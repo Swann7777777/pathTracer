@@ -1,7 +1,7 @@
 class fileStreamClass {
     public:
 
-        #pragma pack(push, 1) // Prevent padding
+        #pragma pack(push, 1)
 
         struct headerStruct {
             uint16_t signature;
@@ -25,32 +25,36 @@ class fileStreamClass {
         };
 
         #pragma pack(pop)
-
-        struct pixelDataStruct { // Move that ?
-            uint8_t b;
-            uint8_t g;
-            uint8_t r;
-        };
         
         headerStruct header{};
         infoHeaderStruct infoHeader{};
 
+        int padding;
+        std::ofstream file;
 
-        fileStreamClass(int width, int height) {
+
+        fileStreamClass(int width, int height, std::string filename) {
+
+            padding = (4 - ((width * 3) % 4) % 4);
 
             header.signature = 0x4D42;
+            header.fileSize = 54 + (24 * width + 8 * padding) * height;
             header.reserved = 0;
+            header.dataOffset = 54;
 
             infoHeader.size = 40;
             infoHeader.width = width;
             infoHeader.height = height;
             infoHeader.planes = 1;
-            infoHeader.bitsPerPixel = 8;
+            infoHeader.bitsPerPixel = 24;
             infoHeader.compression = 0;
-            infoHeader.imageSize = 0;
+            infoHeader.imageSize = (width * 3 + padding) *height;
             infoHeader.xpixelsPerM = 0;
             infoHeader.ypixelsPerM = 0;
             infoHeader.colorsUsed = 0;
             infoHeader.importantColors = 0;
+
+            file.open(filename, std::ios::binary);
+
         }
 };
