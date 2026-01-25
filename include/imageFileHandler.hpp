@@ -1,4 +1,4 @@
-class fileStreamClass {
+class imageFileClass {
     public:
 
         #pragma pack(push, 1)
@@ -33,7 +33,14 @@ class fileStreamClass {
         std::ofstream file;
 
 
-        fileStreamClass(int width, int height, std::string filename) {
+        imageFileClass(int width, int height, std::string fileName) {
+
+            file.open(fileName, std::ios::binary);
+
+            if (!file) {
+                std::cout << "Couldn't open the render file.\n";
+                exit(1);
+            }
 
             padding = (4 - ((width * 3) % 4) % 4);
 
@@ -53,8 +60,5 @@ class fileStreamClass {
             infoHeader.ypixelsPerM = 0;
             infoHeader.colorsUsed = 0;
             infoHeader.importantColors = 0;
-
-            file.open(filename, std::ios::binary);
-
         }
 };
