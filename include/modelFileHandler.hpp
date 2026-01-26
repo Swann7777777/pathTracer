@@ -1,13 +1,3 @@
-struct vector3 {
-
-    float x, y, z;
-};
-
-struct vector2 {
-    float x, y;
-};
-
-
 class modelFileClass {
     public:
 
@@ -40,6 +30,7 @@ class modelFileClass {
             float value;
             std::vector<float> tmp;
             objectStruct tmpObject;
+            std::string prefix;
             
 
             while (getline(file, line)) {
@@ -50,19 +41,19 @@ class modelFileClass {
 
                 tmp.clear();
 
-                std::string prefix = line.substr(0, 2);
+                std::istringstream lineStream(line);
 
-                if (prefix == "o " && !tmpObject.faces.empty()) {
+                lineStream >> prefix;
+
+                if (prefix == "o" && !tmpObject.faces.empty()) {
 
                     objects.push_back(tmpObject);
                     tmpObject = {};
                 }
 
-                if (prefix == "v ") {
-
-                    std::stringstream ss(line.substr(2, line.size()));
+                if (prefix == "v") {
                     
-                    while (ss >> value) {
+                    while (lineStream >> value) {
                         
                         tmp.push_back(value);
                     }
@@ -77,9 +68,7 @@ class modelFileClass {
 
                 else if (prefix == "vt") {
 
-                    std::stringstream ss(line.substr(3, line.size()));
-
-                    while (ss >> value) {
+                    while (lineStream >> value) {
                         
                         tmp.push_back(value);
                     }
@@ -94,9 +83,7 @@ class modelFileClass {
 
                 else if (prefix == "vn") {
 
-                    std::stringstream ss(line.substr(3, line.size()));
-
-                    while (ss >> value) {
+                    while (lineStream >> value) {
                         tmp.push_back(value);
                     }
 
@@ -108,9 +95,7 @@ class modelFileClass {
                     tmpObject.vertexNormals.push_back({tmp[0], tmp[1], tmp[2]});
                 }
 
-                else if (prefix == "f ") {
-
-                    std::istringstream ss(line.substr(2, line.size()));
+                else if (prefix == "f") {
 
                     char delim = '/';
 
@@ -118,7 +103,7 @@ class modelFileClass {
                     std::string valueStr;
                     std::vector<vector3> tmpFaces;
 
-                    while (ss >> tmpStr) {
+                    while (lineStream >> tmpStr) {
 
                         std::istringstream ss1(tmpStr);
 

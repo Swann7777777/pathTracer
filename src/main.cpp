@@ -2,9 +2,12 @@
 #include <fstream>
 #include <filesystem>
 #include <vector>
-#include <math.h>
+#include <cmath>
+#include "../include/vectors.hpp"
 #include "../include/imageFileHandler.hpp"
 #include "../include/modelFileHandler.hpp"
+#include "../include/camera.hpp"
+#include "../include/ray.hpp"
 
 
 struct pixelStruct {
@@ -17,17 +20,18 @@ class faceClass {
 
         std::vector<vector3> vertices;
         std::vector<vector2> texture;
-        std::vector<vector3> normal;
+        vector3 normal;
 
         faceClass() {
 
             vertices.reserve(3);
             texture.reserve(3);
-            normal.reserve(3);
         }
 };
 
 int main() {
+
+
 
     int constexpr width = 255;
     int constexpr height = 255;
@@ -44,9 +48,9 @@ int main() {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
 
-            pixelVector[i * width + j].r = i;
-            pixelVector[i * width + j].g = i;
-            pixelVector[i * width + j].b = i;
+            pixelVector[i * width + j].r = 0;
+            pixelVector[i * width + j].g = 0;
+            pixelVector[i * width + j].b = 0;
         }
     }
 
@@ -71,12 +75,14 @@ int main() {
 
             tmpFace.vertices = {object.geometricVertices[face[0].x - 1], object.geometricVertices[face[1].x - 1], object.geometricVertices[face[2].x - 1]};
             tmpFace.texture = {object.textureCoordinates[face[0].y - 1], object.textureCoordinates[face[1].y - 1], object.textureCoordinates[face[2].y - 1]};
-            tmpFace.normal = {object.vertexNormals[face[0].z - 1], object.vertexNormals[face[1].z - 1], object.vertexNormals[face[2].z - 1]};
+            tmpFace.normal = object.vertexNormals[face[0].z - 1];
 
 
             faces.push_back(tmpFace);
         }
     }
+
     
+
     return 0;
 }
