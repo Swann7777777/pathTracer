@@ -1,8 +1,0 @@
-[
-{
-  "directory": "/home/swann7777777/Documents/dev/C++/pathTracer/build",
-  "command": "/usr/bin/c++  -I/home/swann7777777/Documents/dev/C++/pathTracer/include -g -std=gnu++17 -Wall -o CMakeFiles/main.dir/src/main.cpp.o -c /home/swann7777777/Documents/dev/C++/pathTracer/src/main.cpp",
-  "file": "/home/swann7777777/Documents/dev/C++/pathTracer/src/main.cpp",
-  "output": "CMakeFiles/main.dir/src/main.cpp.o"
-}
-]

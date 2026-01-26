@@ -7,3 +7,8 @@ struct vector2 {
     
     float x, y;
 };
+
+struct pixelStruct {
+
+    uint8_t b, g, r;
+};

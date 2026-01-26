@@ -5,3 +5,5 @@
 [.obj file format Wikipedia article](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
 
 [3D projection Wikipedia article](https://en.wikipedia.org/wiki/3D_projection)
+
+[Ray tracing Wikipedia article](https://en.wikipedia.org/wiki/Ray_tracing_(graphics))

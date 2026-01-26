@@ -15,10 +15,8 @@ class modelFileClass {
 
         std::vector<objectStruct> objects;
 
-
-
-        modelFileClass(std::string fileName) {
-
+        void loadModel(std::string fileName) {
+            
             file.open(fileName);
 
             if (!file) {

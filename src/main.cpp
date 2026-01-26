@@ -9,11 +9,12 @@
 #include "../include/camera.hpp"
 #include "../include/ray.hpp"
 
+class polygonClass {
 
-struct pixelStruct {
+    public:
 
-    uint8_t b, g, r;
 };
+
 
 class faceClass {
     public:
@@ -33,55 +34,82 @@ int main() {
 
 
 
-    int constexpr width = 255;
-    int constexpr height = 255;
+    int constexpr width = 1920;
+    int constexpr height = 1080;
+    vector3 constexpr cameraPosition = {-3, 0.5, 0};
+    vector3 constexpr cameraAngle = {0, 0, 0};
+    int constexpr cameraFieldOfView = 90;
     const std::string imageFileName = "../renders/render.bmp";
     const std::string modelFileName = "../models/cube.obj";
     
-    imageFileClass imageFile(width, height, imageFileName);
-    modelFileClass modelFile(modelFileName);
 
-    std::vector<pixelStruct> pixelVector(width * height);
-
-    std::vector<faceClass> faces;
-
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-
-            pixelVector[i * width + j].r = 0;
-            pixelVector[i * width + j].g = 0;
-            pixelVector[i * width + j].b = 0;
-        }
-    }
-
-
-    imageFile.file.write(reinterpret_cast<char*>(&imageFile.header), sizeof(imageFile.header));
-    imageFile.file.write(reinterpret_cast<char*>(&imageFile.infoHeader), sizeof(imageFile.infoHeader));
-
-    std::vector<char> paddingVector(imageFile.padding, 0);
-
-    for (int i = 0; i < height; i++) {
-        imageFile.file.write(reinterpret_cast<char*>(pixelVector.data() + i * width), width * sizeof(pixelStruct));
-        imageFile.file.write(paddingVector.data(), imageFile.padding);
-    }
-
-    imageFile.file.close();
+    modelFileClass modelFile;
+    modelFile.loadModel(modelFileName);
     modelFile.file.close();
+    
+    
+    
+    std::vector<faceClass> faces;
     
     for (const auto &object : modelFile.objects) {
         for (const auto &face : object.faces) {
-
+            
             faceClass tmpFace;
-
+            
             tmpFace.vertices = {object.geometricVertices[face[0].x - 1], object.geometricVertices[face[1].x - 1], object.geometricVertices[face[2].x - 1]};
             tmpFace.texture = {object.textureCoordinates[face[0].y - 1], object.textureCoordinates[face[1].y - 1], object.textureCoordinates[face[2].y - 1]};
             tmpFace.normal = object.vertexNormals[face[0].z - 1];
-
-
+            
+            
             faces.push_back(tmpFace);
         }
     }
+    
+    
+    cameraClass camera(cameraPosition, cameraAngle, cameraFieldOfView);
 
+
+
+    std::vector<rayClass> rayVector(width * height);
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+
+            rayVector[i * width + j].origin = camera.position_;
+
+            vector2 p;
+
+
+            rayVector[i * width + j].direction = {};
+        }
+    }
+
+
+
+
+
+
+
+
+
+    
+
+    std::vector<pixelStruct> pixelVector(width * height);
+    
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            
+            pixelVector[i * width + j].r = j*255/1920;
+            pixelVector[i * width + j].g = j*255/1920;
+            pixelVector[i * width + j].b = j*255/1920;
+        }
+    }
+
+
+
+
+    imageFileClass imageFile(width, height, imageFileName);
+    imageFile.write(pixelVector);
+    imageFile.file.close();
     
 
     return 0;
