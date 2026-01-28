@@ -23,6 +23,10 @@ struct vector3 {
         return {y*other.z - z*other.y, z*other.x - x*other.z, x*other.y - y*other.x};
     }
 
+    float dotProduct(vector3 other) {
+        return {x*other.x + y*other.y + z*other.z};
+    }
+
     vector3 scalar(float scalar) {
         return {scalar * x, scalar * y, scalar * z};
     }
