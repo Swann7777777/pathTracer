@@ -34,11 +34,13 @@ int main() {
 
 
 
-    int constexpr width = 1920;
-    int constexpr height = 1080;
-    vector3 constexpr cameraPosition = {-3, 0.5, 0};
-    vector3 constexpr cameraAngle = {0, 0, 0};
+    int constexpr width = 7;
+    int constexpr height = 4;
+    vector3 constexpr cameraPosition = {-3, 0, 0};
     int constexpr cameraFieldOfView = 90;
+    float viewportDistance = 1;
+    vector3 target = {0, 0, 0};
+    vector3 v = {0, 1, 0};
     const std::string imageFileName = "../renders/render.bmp";
     const std::string modelFileName = "../models/cube.obj";
     
@@ -66,20 +68,34 @@ int main() {
     }
     
     
-    cameraClass camera(cameraPosition, cameraAngle, cameraFieldOfView);
+    cameraClass camera(cameraPosition, cameraFieldOfView, viewportDistance, v);
 
+    vector3 t = target - camera.position;
+    vector3 b = t.crossProduct(v);
+    vector3 tn = t.normalize();
+    vector3 bn = b.normalize();
+    vector3 vn = tn.crossProduct(bn);
 
+    float gx = camera.d * std::tan(camera.fieldOfView / 2);
+    float gy = gx * (height - 1) / (width - 1);
+
+    vector3 qx = bn.scalar(2*gx / (width - 1));
+    vector3 qy = vn.scalar(2*gy / (height - 1));
+    vector3 p1m = tn.scalar(camera.d) - bn.scalar(gx) - vn.scalar(gy);
+
+    std::cout << "E = (" << cameraPosition.x << "," << cameraPosition.z << "," << cameraPosition.y << ")\n";
+    std::cout << "T = (" << target.x << "," << target.z << "," << target.y << ")\n";
 
     std::vector<rayClass> rayVector(width * height);
+
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
 
-            rayVector[i * width + j].origin = camera.position_;
+            rayVector[i * width + j].origin = camera.position;
 
-            vector2 p;
+            rayVector[i * width + j].direction = camera.position + (p1m + qx.scalar(j) + qy.scalar(i));
 
-
-            rayVector[i * width + j].direction = {};
+            std::cout << "vector(E,(" << rayVector[i * width + j].direction.x << "," << rayVector[i * width + j].direction.z << "," << rayVector[i * width + j].direction.y << "))\n";
         }
     }
 
@@ -98,11 +114,13 @@ int main() {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             
-            pixelVector[i * width + j].r = j*255/1920;
-            pixelVector[i * width + j].g = j*255/1920;
-            pixelVector[i * width + j].b = j*255/1920;
+            pixelVector[i * width + j].r = 0;
+            pixelVector[i * width + j].g = 0;
+            pixelVector[i * width + j].b = 0;
         }
     }
+
+
 
 
 

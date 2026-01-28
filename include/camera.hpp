@@ -1,16 +1,15 @@
 class cameraClass {
     public :
 
-    vector3 position_;
-    vector3 angle_;
-    float fieldOfView_;
+    vector3 position;
+    vector3 angle;
+    float fieldOfView;
     float d;
 
-    cameraClass(vector3 position, vector3 angle, int fieldOfView) {
+    cameraClass(vector3 position, float fieldOfView, float d, vector3 roll) {
 
-        position_ = position;
-        angle_ = angle;
-        fieldOfView_ = fieldOfView*M_PI*180;
-        d = 1/tan(fieldOfView_/2);
+        this->position = position;
+        this->fieldOfView = fieldOfView*M_PI/180;
+        this->d = d;
     };
 };
