@@ -35,7 +35,7 @@ class rayClass {
                 rayVector[i * width + j].i = i;
                 rayVector[i * width + j].j = j;
 
-                rayVector[i * width + j].direction = (p1m + qx.scalar(i) + qy.scalar(j));
+                rayVector[i * width + j].direction = (p1m + qx.scalar(j) + qy.scalar(i));
 
                 //std::cout << "vector(E,(" << rayVector[i * width + j].direction.x << "," << rayVector[i * width + j].direction.z << "," << rayVector[i * width + j].direction.y << "))\n";
             }
@@ -51,25 +51,28 @@ class rayClass {
         vector3 h = direction.crossProduct(e2);
         float a = e1.dotProduct(h);
 
-        if (a > -0.001 && a < 0.001) {
+        if (a > -0.0000001 && a < 0.0000001) {
             return false;
         }
         
         vector3 s = origin - triangle.vertices[0];
-        float u = (1/a)*s.dotProduct(h);
+
+        float invA = 1/a;
+
+        float u = (invA)*s.dotProduct(h);
         
         if (u > 1 || u < 0) {
             return false;
         }
         
         vector3 q = s.crossProduct(e1);
-        float v = (1/a)*direction.dotProduct(q);
+        float v = (invA)*direction.dotProduct(q);
         
         if (u + v > 1 || v < 0) {
             return false;
         }
         
-        float t = (1/a)*e2.dotProduct(q);
+        float t = (invA)*e2.dotProduct(q);
         
         if (t > 0) {
             if (t < distance) {
@@ -87,7 +90,7 @@ class rayClass {
         std::vector<pixelStruct> pixelVector(height * width);
 
 
-        float coefficient = 0.01;
+        float coefficient = 0.8;
 
         int oldPercent = 0;
 
@@ -100,8 +103,10 @@ class rayClass {
 
             for (const auto &triangle : triangleVector) {
 
-
-                ray.checkIntersection(triangle);
+                
+                if (ray.checkIntersection(triangle)) {
+                    //pixelVector[ray.i * width + ray.j] = {255, 255, 255};
+                }
                 
             }
 

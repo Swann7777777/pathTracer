@@ -37,7 +37,11 @@ struct vector2 {
     float x, y;
 };
 
+#pragma pack(push, 1)
+
 struct pixelStruct {
 
     uint8_t b, g, r;
 };
+
+#pragma pack(pop)

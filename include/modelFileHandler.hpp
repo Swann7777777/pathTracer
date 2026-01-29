@@ -2,20 +2,18 @@ class modelFileClass {
     public:
 
     struct objectStruct {
-
-        std::vector<vector3> geometricVertices;
-        std::vector<vector2> textureCoordinates;
-        std::vector<vector3> vertexNormals;
         std::vector<std::vector<vector3>> triangles;
     };
 
-
+    std::vector<vector3> geometricVertices;
+    std::vector<vector2> textureCoordinates;
+    std::vector<vector3> vertexNormals;
 
     std::ifstream file;
 
     std::vector<objectStruct> objects;
 
-    void loadModel(std::string fileName) {
+    modelFileClass(std::string fileName) {
         
         file.open(fileName);
 
@@ -56,13 +54,13 @@ class modelFileClass {
                     tmp.push_back(value);
                 }
 
-                if (tmp.size() < 3 || tmp.size() > 4) {
-                    // std::cout << line << "\n";
-                    // std::cout << "Incorrect geometric vertice value in model file.\n";
-                    // exit(1);
+                if (tmp.size() != 3) {
+                    std::cout << line << "\n";
+                    std::cout << "Incorrect geometric vertice value in model file.\n";
+                    exit(1);
                 }
                 
-                tmpObject.geometricVertices.push_back({tmp[0], tmp[1], tmp[2]});
+                geometricVertices.push_back({tmp[0], tmp[1], tmp[2]});
             }
             
             else if (prefix == "vt") {
@@ -73,12 +71,12 @@ class modelFileClass {
                 }
                 
                 if (tmp.size() != 2) {
-                    // std::cout << line << "\n";
-                    // std::cout << "Incorrect texture coordinate value in model file.\n";
-                    // exit(1);
+                    std::cout << line << "\n";
+                    std::cout << "Incorrect texture coordinate value in model file.\n";
+                    exit(1);
                 }
 
-                tmpObject.textureCoordinates.push_back({tmp[0], tmp[1]});
+                textureCoordinates.push_back({tmp[0], tmp[1]});
             }
             
             else if (prefix == "vn") {
@@ -87,12 +85,12 @@ class modelFileClass {
                     tmp.push_back(value);
                 }
                 
-                if (tmp.size() < 1 || tmp.size() > 3) {
+                if (tmp.size() != 3) {
                     std::cout << "Incorrect vertex normal value in model file.\n";
                     exit(1);
                 }
                 
-                tmpObject.vertexNormals.push_back({tmp[0], tmp[1], tmp[2]});
+                vertexNormals.push_back({tmp[0], tmp[1], tmp[2]});
             }
             
             else if (prefix == "f") {
@@ -114,12 +112,20 @@ class modelFileClass {
                         }
                     }
                     
-                    if (tmp.size() < 1 || tmp.size() > 3) {
+                    if (tmp.size() == 2) {
+                        tmpTriangles.push_back({tmp[0], tmp[1], -1});
+                    }
+
+                    else if (tmp.size() == 3) {
+                        tmpTriangles.push_back({tmp[0], tmp[1], tmp[2]});
+                    }
+
+                    else {
                         std::cout << "Incorrect triangle value in model file.\n";
+                        std::cout << line << "\n";
                         exit(1);
                     }
                     
-                    tmpTriangles.push_back({tmp[0], tmp[1], tmp[2]});
                     tmp.clear();
                     tmpStr = "";
                 }
@@ -134,9 +140,7 @@ class modelFileClass {
         }
 
         objects.push_back(tmpObject);
-    }
 
-    void loadTexture() {
-        
+        file.close();
     }
 };

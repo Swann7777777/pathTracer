@@ -14,9 +14,9 @@ class triangleClass {
                 
                 triangleClass tmpTriangle;
                 
-                tmpTriangle.vertices = {object.geometricVertices[triangle[0].x - 1], object.geometricVertices[triangle[1].x - 1], object.geometricVertices[triangle[2].x - 1]};
-                tmpTriangle.texture = {object.textureCoordinates[triangle[0].y - 1], object.textureCoordinates[triangle[1].y - 1], object.textureCoordinates[triangle[2].y - 1]};
-                tmpTriangle.normal = object.vertexNormals[triangle[0].z - 1];
+                tmpTriangle.vertices = {modelFile.geometricVertices[triangle[0].x - 1], modelFile.geometricVertices[triangle[1].x - 1], modelFile.geometricVertices[triangle[2].x - 1]};
+                tmpTriangle.texture = {modelFile.textureCoordinates[triangle[0].y - 1], modelFile.textureCoordinates[triangle[1].y - 1], modelFile.textureCoordinates[triangle[2].y - 1]};
+                //tmpTriangle.normal = object.vertexNormals[triangle[0].z - 1];
                 
                 triangleVector.push_back(tmpTriangle);
             }
