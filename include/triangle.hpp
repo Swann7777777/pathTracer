@@ -2,8 +2,9 @@ class triangleClass {
     public:
 
     std::array<vector3, 3> vertices;
-    std::array<vector2, 3> texture;
+    std::array<vector3, 3> texture;
     vector3 normal;
+    float u, v, w;
 
     static std::vector<triangleClass> generateTriangles(const modelFileClass &modelFile) {
 

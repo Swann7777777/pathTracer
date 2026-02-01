@@ -6,7 +6,7 @@ class modelFileClass {
     };
 
     std::vector<vector3> geometricVertices;
-    std::vector<vector2> textureCoordinates;
+    std::vector<vector3> textureCoordinates;
     std::vector<vector3> vertexNormals;
 
     std::ifstream file;
@@ -76,7 +76,7 @@ class modelFileClass {
                     exit(1);
                 }
 
-                textureCoordinates.push_back({tmp[0], tmp[1]});
+                textureCoordinates.push_back({tmp[0], tmp[1], 0});
             }
             
             else if (prefix == "vn") {

@@ -44,7 +44,7 @@ class rayClass {
         return rayVector;
     }
 
-    bool checkIntersection(const triangleClass &triangle) {
+    bool checkIntersection(triangleClass &triangle) {
 
         vector3 e1 = triangle.vertices[1] - triangle.vertices[0];
         vector3 e2 = triangle.vertices[2] - triangle.vertices[0];
@@ -77,42 +77,49 @@ class rayClass {
         if (t > 0) {
             if (t < distance) {
                 distance = t;
+                triangle.u = u;
+                triangle.v = v;
+                triangle.w = 1 - (u + v);
             }
-
             return true;
         }
         
         return false;
     }
 
-    static std::vector<pixelStruct> renderImage(std::vector<rayClass> &rayVector, int width, int height, std::vector<triangleClass> &triangleVector) {
+    static std::vector<pixelStruct> renderImage(std::vector<rayClass> &rayVector, int width, int height, std::vector<triangleClass> &triangleVector, std::vector<pixelStruct> &texturePixelVector, int textureHeight, int textureWidth){
 
         std::vector<pixelStruct> pixelVector(height * width);
-
-
-        float coefficient = 0.8;
 
         int oldPercent = 0;
 
         for (auto &ray : rayVector) {
-            int percent = std::round(((ray.i * width + ray.j) / static_cast<float>(width * height)) * 100);
+            int percent = static_cast<int>(((ray.i * width + ray.j) / static_cast<float>(width * height)) * 100);
             if (percent != oldPercent) {
                 oldPercent = percent;
                 std::cout << percent << "% complete...\n";
             }
 
-            for (const auto &triangle : triangleVector) {
+            triangleClass closestTriangle;
+            bool collision = false;
+
+            for (auto &triangle : triangleVector) {
 
                 
                 if (ray.checkIntersection(triangle)) {
-                    //pixelVector[ray.i * width + ray.j] = {255, 255, 255};
+                    closestTriangle = triangle;
+                    collision = true;
                 }
-                
             }
 
-            uint8_t color = static_cast<uint8_t>((255/(ray.distance * coefficient)));
-
-            pixelVector[ray.i * width + ray.j] = {color, color, color};
+            if (collision) {
+                vector3 uvHit = closestTriangle.texture[0].scalar(closestTriangle.w) + closestTriangle.texture[1].scalar(closestTriangle.u) + closestTriangle.texture[2].scalar(closestTriangle.v);
+                float u = std::max(0.0f, std::min(1.0f, uvHit.x));
+                float v = std::max(0.0f, std::min(1.0f, uvHit.y));
+                v = 1.0f - v;
+                size_t index = static_cast<size_t>(v * (textureWidth - 1)) * textureWidth + static_cast<size_t>(u * (textureWidth - 1));
+                pixelVector[ray.i * width + ray.j] = texturePixelVector[index];
+            }
         }
 
         return pixelVector;

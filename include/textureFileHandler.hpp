@@ -55,11 +55,16 @@ class textureFileClass {
 
         int padding = (4 - ((infoHeader.width * 3) % 4) % 4) % 4;
 
-        for (int i = 0; i < infoHeader.height; i++) {
+        int rowIndex = 0;
+
+        for (int i = infoHeader.height - 1; i >= 0; i--) {
             std::vector<pixelStruct> pixelRow(infoHeader.width);
             file.read(reinterpret_cast<char*>(pixelRow.data()), infoHeader.width * 3);
             file.ignore(padding);
-            pixelVector.insert(pixelVector.end(), pixelRow.begin(), pixelRow.end());
+            for (int j = 0; j < infoHeader.width; j++) {
+                pixelVector[rowIndex * infoHeader.width + j] = pixelRow[j];
+            }
+            rowIndex++;
         }
 
         file.close();

@@ -8,9 +8,9 @@
 #include <cstring>
 #include "../include/classes.hpp"
 #include "../include/modelFileHandler.hpp"
+#include "../include/triangle.hpp"
 #include "../include/textureFileHandler.hpp"
 #include "../include/renderFileHandler.hpp"
-#include "../include/triangle.hpp"
 #include "../include/camera.hpp"
 #include "../include/ray.hpp"
 
@@ -34,7 +34,7 @@ int main() {
 
     std::vector<triangleClass> triangleVector = triangleClass::generateTriangles(modelFile);
     std::vector<rayClass> rayVector = rayClass::initializeRays(target, camera, height, width, v);
-    std::vector<pixelStruct> pixelVector = rayClass::renderImage(rayVector, width, height, triangleVector);
+    std::vector<pixelStruct> pixelVector = rayClass::renderImage(rayVector, width, height, triangleVector, textureFile.pixelVector, textureFile.infoHeader.width, textureFile.infoHeader.height);
 
 
     renderFileClass renderFile(width, height, imageFileName);

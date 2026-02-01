@@ -32,11 +32,6 @@ struct vector3 {
     }
 };
 
-struct vector2 {
-    
-    float x, y;
-};
-
 #pragma pack(push, 1)
 
 struct pixelStruct {
