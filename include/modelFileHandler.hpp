@@ -54,11 +54,11 @@ class modelFileClass {
                     tmp.push_back(value);
                 }
 
-                if (tmp.size() != 3) {
-                    std::cout << line << "\n";
-                    std::cout << "Incorrect geometric vertice value in model file.\n";
-                    exit(1);
-                }
+                // if (tmp.size() != 3) {
+                //     std::cout << "Unknown geometric vertice value in model file.\n";
+                //     std::cout << line << "\n";
+                //     exit(1);
+                // }
                 
                 geometricVertices.push_back({tmp[0], tmp[1], tmp[2]});
             }
@@ -71,8 +71,8 @@ class modelFileClass {
                 }
                 
                 if (tmp.size() != 2) {
-                    std::cout << line << "\n";
                     std::cout << "Incorrect texture coordinate value in model file.\n";
+                    std::cout << line << "\n";
                     exit(1);
                 }
 
@@ -87,6 +87,7 @@ class modelFileClass {
                 
                 if (tmp.size() != 3) {
                     std::cout << "Incorrect vertex normal value in model file.\n";
+                    std::cout << line << "\n";
                     exit(1);
                 }
                 
@@ -132,6 +133,7 @@ class modelFileClass {
                 
                 if (tmpTriangles.size() != 3) {
                     std::cout << "Incorrect triangle value in model file.\n";
+                    std::cout << line << "\n";
                     exit(1);
                 }
 

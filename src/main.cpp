@@ -15,16 +15,18 @@
 #include "../include/ray.hpp"
 
 int main() {
-    int constexpr width = 255;
-    int constexpr height = 255;
-    vector3 constexpr cameraPosition = {1, 0, 1.5};
-    int constexpr cameraFieldOfView = 90;
+    int constexpr width = 500;
+    int constexpr height = 1000;
+    vector3 constexpr cameraPosition = {-13, -13, 30};
+    int constexpr cameraFieldOfView = 60;
     float viewportDistance = 1;
-    vector3 target = {0, 0, 0};
-    vector3 v = {0, 1, 0};
+    vector3 target = {0, 0, 20};
+    vector3 v = {0, 0, 1};
     const std::string imageFileName = "../renders/render.bmp";
-    const std::string modelFileName = "../models/skull.obj";
-    const std::string textureFileName = "../models/skull.jpg";
+    // const std::string modelFileName = "../models/skull.obj";
+    const std::string modelFileName = "../models/character2.obj";
+    // const std::string textureFileName = "../models/skull.jpg";
+    const std::string textureFileName = "../models/character2.png";
     cameraClass camera(cameraPosition, cameraFieldOfView, viewportDistance, v);
     
 

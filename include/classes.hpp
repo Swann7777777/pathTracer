@@ -39,4 +39,8 @@ struct pixelStruct {
     uint8_t b, g, r;
 };
 
+struct rgbaPixelStruct {
+    uint8_t b, g, r, a;
+};
+
 #pragma pack(pop)

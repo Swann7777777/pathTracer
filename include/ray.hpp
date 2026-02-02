@@ -80,14 +80,14 @@ class rayClass {
                 triangle.u = u;
                 triangle.v = v;
                 triangle.w = 1 - (u + v);
+                return true;
             }
-            return true;
         }
         
         return false;
     }
 
-    static std::vector<pixelStruct> renderImage(std::vector<rayClass> &rayVector, int width, int height, std::vector<triangleClass> &triangleVector, std::vector<pixelStruct> &texturePixelVector, int textureHeight, int textureWidth){
+    static std::vector<pixelStruct> renderImage(std::vector<rayClass> &rayVector, int width, int height, std::vector<triangleClass> &triangleVector, std::vector<pixelStruct> &texturePixelVector, int textureWidth, int textureHeight){
 
         std::vector<pixelStruct> pixelVector(height * width);
 
@@ -114,10 +114,13 @@ class rayClass {
 
             if (collision) {
                 vector3 uvHit = closestTriangle.texture[0].scalar(closestTriangle.w) + closestTriangle.texture[1].scalar(closestTriangle.u) + closestTriangle.texture[2].scalar(closestTriangle.v);
-                float u = std::max(0.0f, std::min(1.0f, uvHit.x));
-                float v = std::max(0.0f, std::min(1.0f, uvHit.y));
-                v = 1.0f - v;
-                size_t index = static_cast<size_t>(v * (textureWidth - 1)) * textureWidth + static_cast<size_t>(u * (textureWidth - 1));
+                float u = uvHit.x;
+                float v = uvHit.y;
+
+                size_t row = static_cast<size_t>(v * (textureHeight - 1));
+                size_t col = static_cast<size_t>(u * (textureWidth - 1));
+                size_t index = row * textureWidth + col;
+                
                 pixelVector[ray.i * width + ray.j] = texturePixelVector[index];
             }
         }

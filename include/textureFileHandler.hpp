@@ -34,7 +34,7 @@ class textureFileClass {
 
     textureFileClass(std::string fileName) {
 
-        std::string commandString = "cd ../models && convert " + fileName + " tmpTexture.bmp";
+        std::string commandString = "cd ../models && magick " + fileName + " tmpTexture.bmp";
         char command[512];
         strcpy(command, commandString.c_str());
         system(command);
@@ -51,21 +51,37 @@ class textureFileClass {
 
         file.seekg(header.dataOffset);
 
-        pixelVector.resize(infoHeader.width * infoHeader.height);
+        bool rgba = false;
 
-        int padding = (4 - ((infoHeader.width * 3) % 4) % 4) % 4;
+        if (infoHeader.bitsPerPixel == 32) {
+            rgba = true;
+        }
+
+        int padding = (4 - ((infoHeader.width * (3 + rgba)) % 4) % 4) % 4;
 
         int rowIndex = 0;
 
-        for (int i = infoHeader.height - 1; i >= 0; i--) {
-            std::vector<pixelStruct> pixelRow(infoHeader.width);
-            file.read(reinterpret_cast<char*>(pixelRow.data()), infoHeader.width * 3);
-            file.ignore(padding);
+        for (int i = 0; i < infoHeader.height; i++) {
             for (int j = 0; j < infoHeader.width; j++) {
-                pixelVector[rowIndex * infoHeader.width + j] = pixelRow[j];
+                pixelStruct pixel;
+                file.read(reinterpret_cast<char*>(&pixel), 3);
+                if (rgba) {
+                    file.ignore(1);
+                }
+                pixelVector.push_back(pixel);
             }
-            rowIndex++;
+            file.ignore(padding);
         }
+
+        // for (int i = 0; i < infoHeader.height; i++) {
+        //     std::vector<pixelStruct> pixelRow(infoHeader.width);
+        //     file.read(reinterpret_cast<char*>(pixelRow.data()), infoHeader.width * 3);
+        //     file.ignore(padding);
+        //     for (int j = 0; j < infoHeader.width; j++) {
+        //         pixelVector[rowIndex * infoHeader.width + j] = pixelRow[j];
+        //     }
+        //     rowIndex++;
+        // }
 
         file.close();
     }
