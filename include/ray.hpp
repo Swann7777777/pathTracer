@@ -87,13 +87,14 @@ class rayClass {
         return false;
     }
 
-    static std::vector<pixelStruct> renderImage(std::vector<rayClass> &rayVector, int width, int height, std::vector<triangleClass> &triangleVector, std::vector<pixelStruct> &texturePixelVector, int textureWidth, int textureHeight){
+    static std::vector<pixelStruct> renderImage(std::vector<rayClass> &rayVector, int width, int height, std::vector<triangleClass> &triangleVector,
+        std::vector<pixelStruct> &texturePixelVector, int textureWidth, int textureHeight, threadPoolClass &threadPool){
 
         std::vector<pixelStruct> pixelVector(height * width);
 
         int oldPercent = 0;
 
-        for (auto &ray : rayVector) {
+        for (auto ray : rayVector) {
             int percent = static_cast<int>(((ray.i * width + ray.j) / static_cast<float>(width * height)) * 100);
             if (percent != oldPercent) {
                 oldPercent = percent;
@@ -103,26 +104,28 @@ class rayClass {
             triangleClass closestTriangle;
             bool collision = false;
 
-            for (auto &triangle : triangleVector) {
+            threadPool.enqueue([&triangleVector, &ray, &closestTriangle, &collision, &textureWidth, &textureHeight, &pixelVector, &width, &texturePixelVector] {
 
-                
-                if (ray.checkIntersection(triangle)) {
-                    closestTriangle = triangle;
-                    collision = true;
+                for (auto &triangle : triangleVector) {
+                    
+                    if (ray.checkIntersection(triangle)) {
+                        closestTriangle = triangle;
+                        collision = true;
+                    }
                 }
-            }
 
-            if (collision) {
-                vector3 uvHit = closestTriangle.texture[0].scalar(closestTriangle.w) + closestTriangle.texture[1].scalar(closestTriangle.u) + closestTriangle.texture[2].scalar(closestTriangle.v);
-                float u = uvHit.x;
-                float v = uvHit.y;
+                if (collision) {
+                    vector3 uvHit = closestTriangle.texture[0].scalar(closestTriangle.w) + closestTriangle.texture[1].scalar(closestTriangle.u) + closestTriangle.texture[2].scalar(closestTriangle.v);
+                    float u = uvHit.x;
+                    float v = uvHit.y;
 
-                size_t row = static_cast<size_t>(v * (textureHeight - 1));
-                size_t col = static_cast<size_t>(u * (textureWidth - 1));
-                size_t index = row * textureWidth + col;
-                
-                pixelVector[ray.i * width + ray.j] = texturePixelVector[index];
-            }
+                    size_t row = static_cast<size_t>(v * (textureHeight - 1));
+                    size_t col = static_cast<size_t>(u * (textureWidth - 1));
+                    size_t index = row * textureWidth + col;
+                    
+                    pixelVector[ray.i * width + ray.j] = texturePixelVector[index];
+                }
+            });
         }
 
         return pixelVector;

@@ -34,7 +34,7 @@ class textureFileClass {
 
     textureFileClass(std::string fileName) {
 
-        std::string commandString = "cd ../models && magick " + fileName + " tmpTexture.bmp";
+        std::string commandString = "cd ../models && convert " + fileName + " tmpTexture.bmp";
         char command[512];
         strcpy(command, commandString.c_str());
         system(command);
@@ -58,8 +58,6 @@ class textureFileClass {
         }
 
         int padding = (4 - ((infoHeader.width * (3 + rgba)) % 4) % 4) % 4;
-
-        int rowIndex = 0;
 
         for (int i = 0; i < infoHeader.height; i++) {
             for (int j = 0; j < infoHeader.width; j++) {
