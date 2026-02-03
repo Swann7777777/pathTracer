@@ -11,6 +11,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <queue>
+#include <future>
+#include <algorithm>
 #include "../include/classes.hpp"
 #include "../include/threads.hpp"
 #include "../include/modelFileHandler.hpp"
@@ -19,10 +21,11 @@
 #include "../include/renderFileHandler.hpp"
 #include "../include/camera.hpp"
 #include "../include/ray.hpp"
+#include "../include/bvh.hpp"
 
 int main() {
-    int constexpr width = 100;
-    int constexpr height = 100;
+    int constexpr width = 1920/1;
+    int constexpr height = 1080/1;
     vector3 constexpr cameraPosition = {0, 2, 2};
     int constexpr cameraFieldOfView = 90;
     float viewportDistance = 1;
