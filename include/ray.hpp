@@ -1,15 +1,86 @@
 class rayClass {
     public:
+
+
+    struct rayStruct {
+        vector3 origin;
+        vector3 direction;
+        float distance;
+        int i;
+        int j;
+
+
+        bool triangleIntersection(triangleClass &triangle, triangleClass &closestTriangle) {
     
-    vector3 origin;
-    vector3 direction;
-    float distance;
-    int i;
-    int j;
+            vector3 e1 = *triangle.vertices[1] - *triangle.vertices[0];
+            vector3 e2 = *triangle.vertices[2] - *triangle.vertices[0];
+            vector3 h = direction.crossProduct(e2);
+            float a = e1.dotProduct(h);
+    
+            if (a > -0.0000001 && a < 0.0000001) {
+                return false;
+            }
+            
+            vector3 s = origin - *triangle.vertices[0];
+    
+            float invA = 1/a;
+    
+            float u = (invA)*s.dotProduct(h);
+            
+            if (u > 1 || u < 0) {
+                return false;
+            }
+            
+            vector3 q = s.crossProduct(e1);
+            float v = (invA)*direction.dotProduct(q);
+            
+            if (u + v > 1 || v < 0) {
+                return false;
+            }
+            
+            float t = (invA)*e2.dotProduct(q);
+            
+            if (t > 0) {
+                if (t < distance) {
+                    distance = t;
+                    closestTriangle.u = u;
+                    closestTriangle.v = v;
+                    closestTriangle.w = 1 - (u + v);
+                    closestTriangle.texture = triangle.texture;
+                    return true;
+                }
+            }
+            
+            return false;
+        }
 
-    static std::vector<rayClass> initializeRays(vector3 target, cameraClass camera, int height, int width, vector3 v) {
+        bool boxIntersection(bvhClass::bvhNodeStruct &box) {
 
-        std::vector<rayClass> rayVector(width * height);
+            vector3 tmpVar = box.minBound - origin;
+            float minFloat = std::numeric_limits<float>::min();
+            vector3 tLow = {tmpVar.x / (direction.x + minFloat), tmpVar.y / (direction.y + minFloat), tmpVar.z / (direction.z + minFloat)};
+
+            tmpVar = box.maxBound - origin;
+            vector3 tHigh = {tmpVar.x / (direction.x + minFloat), tmpVar.y / (direction.y + minFloat), tmpVar.z / (direction.z + minFloat)};
+
+            vector3 tClose = tLow.min(tHigh);
+            vector3 tFar = tLow.max(tHigh);
+
+            float tClose2 = std::max({tClose.x, tClose.y, tClose.z});
+            float tFar2 = std::min({tFar.x, tFar.y, tFar.z});
+
+            if (tClose2 <= tFar2) {
+                return true;
+            }
+
+            return false;
+        }
+    };
+
+
+    static std::vector<rayStruct> initializeRays(vector3 target, cameraClass camera, int height, int width, vector3 v) {
+
+        std::vector<rayStruct> rayVector(width * height);
 
         vector3 t = target - camera.position;
         vector3 b = t.crossProduct(v);
@@ -37,80 +108,44 @@ class rayClass {
         return rayVector;
     }
 
-    bool checkIntersection(triangleClass &triangle, triangleClass &closestTriangle) {
+    static void treeTraversal(bvhClass::bvhNodeStruct* node, rayStruct &ray, triangleClass& closestTriangle, bool &collision) {
 
-        vector3 e1 = triangle.vertices[1] - triangle.vertices[0];
-        vector3 e2 = triangle.vertices[2] - triangle.vertices[0];
-        vector3 h = direction.crossProduct(e2);
-        float a = e1.dotProduct(h);
-
-        if (a > -0.0000001 && a < 0.0000001) {
-            return false;
+        if (!ray.boxIntersection(*node)) {
+            return;
         }
-        
-        vector3 s = origin - triangle.vertices[0];
 
-        float invA = 1/a;
-
-        float u = (invA)*s.dotProduct(h);
-        
-        if (u > 1 || u < 0) {
-            return false;
-        }
-        
-        vector3 q = s.crossProduct(e1);
-        float v = (invA)*direction.dotProduct(q);
-        
-        if (u + v > 1 || v < 0) {
-            return false;
-        }
-        
-        float t = (invA)*e2.dotProduct(q);
-        
-        if (t > 0) {
-            if (t < distance) {
-                distance = t;
-                closestTriangle.u = u;
-                closestTriangle.v = v;
-                closestTriangle.w = 1 - (u + v);
-                closestTriangle.texture = triangle.texture;
-                return true;
+        if (node->childs[0] == nullptr) {
+            for (auto& tri : node->triangles) {
+                if (ray.triangleIntersection(*tri, closestTriangle)) {
+                    collision = true;
+                }
             }
+            return;
         }
-        
-        return false;
+
+        treeTraversal(node->childs[0], ray, closestTriangle, collision);
+        treeTraversal(node->childs[1], ray, closestTriangle, collision);
     }
+
     
-    static std::vector<pixelStruct> renderImage(std::vector<rayClass> &rayVector, int width, int height, std::vector<triangleClass> &triangleVector,
-        std::vector<pixelStruct> &texturePixelVector, int textureWidth, int textureHeight, threadPoolClass &threadPool){
+    static std::vector<pixelStruct> renderImage(std::vector<rayStruct> &rayVector, int width, int height, std::vector<triangleClass> &triangleVector,
+        std::vector<pixelStruct> &texturePixelVector, int textureWidth, int textureHeight, threadPoolClass &threadPool, bvhClass &bvh) {
 
         std::vector<pixelStruct> pixelVector(height * width, pixelStruct{160, 32, 240});
 
         std::vector<std::future<void>> results;
 
-        int oldPercent = 0;
-
         for (auto ray : rayVector) {
-            int percent = static_cast<int>(((ray.i * width + ray.j) / static_cast<float>(width * height)) * 100);
-            if (percent != oldPercent) {
-                oldPercent = percent;
-                std::cout << percent << "% complete...\n";
-            }
 
-            auto task = std::make_shared<std::packaged_task<void()>>([&triangleVector, ray, textureWidth, &textureHeight, &pixelVector, &width, &texturePixelVector]() mutable {
+            auto task = std::make_shared<std::packaged_task<void()>>([&triangleVector, ray, textureWidth, &textureHeight, &pixelVector, &width, &texturePixelVector, &bvh]() mutable {
                 
                 triangleClass closestTriangle;
                 bool collision = false;
-
-                for (auto &triangle : triangleVector) {
-                    
-                    if (ray.checkIntersection(triangle, closestTriangle)) {
-                        collision = true;
-                    }
-                }
+                
+                treeTraversal(&bvh.root, ray, closestTriangle, collision);
 
                 if (collision) {
-                    vector3 uvHit = closestTriangle.texture[0].scalar(closestTriangle.w) + closestTriangle.texture[1].scalar(closestTriangle.u) + closestTriangle.texture[2].scalar(closestTriangle.v);
+                    vector3 uvHit = closestTriangle.texture[0]->scalar(closestTriangle.w) + closestTriangle.texture[1]->scalar(closestTriangle.u) + closestTriangle.texture[2]->scalar(closestTriangle.v);
                     float u = std::clamp(uvHit.x, 0.0f, 1.0f);
                     float v = std::clamp(uvHit.y, 0.0f, 1.0f);
 

@@ -71,16 +71,6 @@ class textureFileClass {
             file.ignore(padding);
         }
 
-        // for (int i = 0; i < infoHeader.height; i++) {
-        //     std::vector<pixelStruct> pixelRow(infoHeader.width);
-        //     file.read(reinterpret_cast<char*>(pixelRow.data()), infoHeader.width * 3);
-        //     file.ignore(padding);
-        //     for (int j = 0; j < infoHeader.width; j++) {
-        //         pixelVector[rowIndex * infoHeader.width + j] = pixelRow[j];
-        //     }
-        //     rowIndex++;
-        // }
-
         file.close();
     }
 };

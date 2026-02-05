@@ -34,6 +34,14 @@ struct vector3 {
     vector3 scalar(const float& scalar) const {
         return {scalar * x, scalar * y, scalar * z};
     }
+
+    vector3 min(const vector3 other) const {
+        return {std::min(x, other.x), std::min(y, other.y), std::min(z, other.z)};
+    }
+
+    vector3 max(const vector3 other) const {
+        return {std::max(x, other.x), std::max(y, other.y), std::max(z, other.z)};
+    }
 };
 
 #pragma pack(push, 1)
