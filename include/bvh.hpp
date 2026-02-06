@@ -6,7 +6,7 @@ class bvhClass {
         vector3 minBound;
         vector3 maxBound;
         std::array<bvhNodeStruct*, 2> childs = {nullptr, nullptr};
-        std::vector<triangleClass*> triangles;
+        std::vector<triangleStruct*> triangles;
 
         bvhNodeStruct() {
             maxBound = {-INFINITY, -INFINITY, -INFINITY};
@@ -74,7 +74,7 @@ class bvhClass {
 
     bvhNodeStruct root;
 
-    bvhClass(std::vector<triangleClass> &triangleVector, int &maxDepth) {
+    bvhClass(std::vector<triangleStruct> &triangleVector, int &maxDepth) {
 
         for (auto& triangle : triangleVector) {
             root.triangles.push_back(&triangle);

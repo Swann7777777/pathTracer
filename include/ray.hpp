@@ -10,7 +10,7 @@ class rayClass {
         int j;
 
 
-        bool triangleIntersection(triangleClass &triangle, triangleClass &closestTriangle) {
+        bool triangleIntersection(triangleStruct &triangle, triangleStruct &closestTriangle) {
     
             vector3 e1 = *triangle.vertices[1] - *triangle.vertices[0];
             vector3 e2 = *triangle.vertices[2] - *triangle.vertices[0];
@@ -108,7 +108,7 @@ class rayClass {
         return rayVector;
     }
 
-    static void treeTraversal(bvhClass::bvhNodeStruct* node, rayStruct &ray, triangleClass& closestTriangle, bool &collision) {
+    static void treeTraversal(bvhClass::bvhNodeStruct* node, rayStruct &ray, triangleStruct &closestTriangle, bool &collision) {
 
         if (!ray.boxIntersection(*node)) {
             return;
@@ -128,7 +128,7 @@ class rayClass {
     }
 
     
-    static std::vector<pixelStruct> renderImage(std::vector<rayStruct> &rayVector, int width, int height, std::vector<triangleClass> &triangleVector,
+    static std::vector<pixelStruct> renderImage(std::vector<rayStruct> &rayVector, int width, int height, std::vector<triangleStruct> &triangleVector,
         std::vector<pixelStruct> &texturePixelVector, int textureWidth, int textureHeight, threadPoolClass &threadPool, bvhClass &bvh) {
 
         std::vector<pixelStruct> pixelVector(height * width, pixelStruct{160, 32, 240});
@@ -139,7 +139,7 @@ class rayClass {
 
             auto task = std::make_shared<std::packaged_task<void()>>([&triangleVector, ray, textureWidth, &textureHeight, &pixelVector, &width, &texturePixelVector, &bvh]() mutable {
                 
-                triangleClass closestTriangle;
+                triangleStruct closestTriangle;
                 bool collision = false;
                 
                 treeTraversal(&bvh.root, ray, closestTriangle, collision);

@@ -13,10 +13,10 @@
 #include <queue>
 #include <future>
 #include <algorithm>
+#include <map>
 #include "../include/classes.hpp"
 #include "../include/threadPool.hpp"
 #include "../include/modelFileHandler.hpp"
-#include "../include/triangle.hpp"
 #include "../include/textureFileHandler.hpp"
 #include "../include/renderFileHandler.hpp"
 #include "../include/camera.hpp"
@@ -38,12 +38,13 @@ int main() {
     cameraClass camera(cameraPosition, cameraFieldOfView, viewportDistance, v);
     
 
-    modelFileClass modelFile(modelFileName);
+    std::vector<triangleStruct> triangleVector;
+    std::map<std::string, materialStruct> materialMap;
+    modelFileClass modelFile(modelFileName, triangleVector, materialMap);
     textureFileClass textureFile(textureFileName);
     
     threadPoolClass threadPool;
     
-    std::vector<triangleClass> triangleVector = triangleClass::generateTriangles(modelFile);
     bvhClass bvh(triangleVector, bvhDepth);
     std::vector<rayClass::rayStruct> rayVector = rayClass::initializeRays(target, camera, height, width, v);
     std::vector<pixelStruct> pixelVector = rayClass::renderImage(rayVector, width, height, triangleVector, textureFile.pixelVector,
