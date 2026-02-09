@@ -44,26 +44,6 @@ struct vector3 {
     }
 };
 
-struct materialStruct {
-
-    vector3 ambientColor;
-    vector3 diffuseColor;
-    vector3 specularColor;
-    float specularWeight;
-    float dissolvance;
-    vector3 transmissionColor;
-    float opticalDensity;
-};
-
-struct triangleStruct {
-
-    std::array<vector3*, 3> vertices;
-    std::array<vector3*, 3> texture;
-    vector3* normal;
-    float u, v, w;
-    materialStruct* material;
-};
-
 #pragma pack(push, 1)
 
 struct pixelStruct {
@@ -75,3 +55,36 @@ struct rgbaPixelStruct {
 };
 
 #pragma pack(pop)
+
+struct textureStruct {
+
+    std::vector<pixelStruct> pixelVector;
+    int width;
+    int height;
+};
+
+struct materialStruct {
+
+    pixelStruct ambientColor;
+    pixelStruct diffuseColor;
+    pixelStruct specularColor;
+    float specularWeight;
+    float dissolvance;
+    pixelStruct transmissionColor;
+    float opticalDensity;
+
+    textureStruct ambientTextureMap;
+    textureStruct diffuseTextureMap;
+    textureStruct specularColorTextureMap;
+    textureStruct specularHighlightComponent;
+    textureStruct alphaTextureMap;
+};
+
+struct triangleStruct {
+
+    std::array<vector3*, 3> vertices;
+    std::array<vector3*, 3> texture;
+    vector3* normal;
+    float u, v, w;
+    materialStruct* material;
+};

@@ -47,6 +47,7 @@ class rayClass {
                     closestTriangle.v = v;
                     closestTriangle.w = 1 - (u + v);
                     closestTriangle.texture = triangle.texture;
+                    closestTriangle.material = triangle.material;
                     return true;
                 }
             }
@@ -127,17 +128,38 @@ class rayClass {
         treeTraversal(node->childs[1], ray, closestTriangle, collision);
     }
 
-    
-    static std::vector<pixelStruct> renderImage(std::vector<rayStruct> &rayVector, int width, int height, std::vector<triangleStruct> &triangleVector,
-        std::vector<pixelStruct> &texturePixelVector, int textureWidth, int textureHeight, threadPoolClass &threadPool, bvhClass &bvh) {
+    static void computePixelColor(triangleStruct &closestTriangle, int renderWidth, std::vector<pixelStruct> &pixelVector, rayStruct &ray, std::map<std::string, materialStruct> &materialMap) {
 
-        std::vector<pixelStruct> pixelVector(height * width, pixelStruct{160, 32, 240});
+        if (closestTriangle.material->diffuseTextureMap.pixelVector.size() != 0) {
+
+            vector3 uvHit = closestTriangle.texture[0]->scalar(closestTriangle.w) + closestTriangle.texture[1]->scalar(closestTriangle.u) + closestTriangle.texture[2]->scalar(closestTriangle.v);
+            float u = std::clamp(uvHit.x, 0.0f, 1.0f);
+            float v = std::clamp(uvHit.y, 0.0f, 1.0f);
+
+            size_t row = static_cast<size_t>(v * (closestTriangle.material->diffuseTextureMap.height - 1));
+            size_t col = static_cast<size_t>(u * (closestTriangle.material->diffuseTextureMap.width - 1));
+            size_t index = row * closestTriangle.material->diffuseTextureMap.width + col;
+
+            pixelVector[ray.i * renderWidth + ray.j] = closestTriangle.material->diffuseTextureMap.pixelVector[index];
+        }
+
+        else {
+            pixelVector[ray.i * renderWidth + ray.j] = {255, 255, 255};
+            // pixelVector[ray.i * renderWidth + ray.j] = closestTriangle.material->ambientColor;
+        }
+    }
+
+    
+    static std::vector<pixelStruct> renderImage(std::vector<rayStruct> &rayVector, int renderWidth, int renderHeight, std::vector<triangleStruct> &triangleVector,
+        std::map<std::string, materialStruct> &materialMap, threadPoolClass &threadPool, bvhClass &bvh) {
+
+        std::vector<pixelStruct> pixelVector(renderHeight * renderWidth, pixelStruct{160, 32, 240});
 
         std::vector<std::future<void>> results;
 
         for (auto ray : rayVector) {
 
-            auto task = std::make_shared<std::packaged_task<void()>>([&triangleVector, ray, textureWidth, &textureHeight, &pixelVector, &width, &texturePixelVector, &bvh]() mutable {
+            auto task = std::make_shared<std::packaged_task<void()>>([&triangleVector, ray, &materialMap, &pixelVector, &renderWidth, &bvh]() mutable {
                 
                 triangleStruct closestTriangle;
                 bool collision = false;
@@ -145,15 +167,7 @@ class rayClass {
                 treeTraversal(&bvh.root, ray, closestTriangle, collision);
 
                 if (collision) {
-                    vector3 uvHit = closestTriangle.texture[0]->scalar(closestTriangle.w) + closestTriangle.texture[1]->scalar(closestTriangle.u) + closestTriangle.texture[2]->scalar(closestTriangle.v);
-                    float u = std::clamp(uvHit.x, 0.0f, 1.0f);
-                    float v = std::clamp(uvHit.y, 0.0f, 1.0f);
-
-                    size_t row = static_cast<size_t>(v * (textureHeight - 1));
-                    size_t col = static_cast<size_t>(u * (textureWidth - 1));
-                    size_t index = row * textureWidth + col;
-
-                    pixelVector[ray.i * width + ray.j] = texturePixelVector[index];
+                    computePixelColor(closestTriangle, renderWidth, pixelVector, ray, materialMap);
                 }
             });
 

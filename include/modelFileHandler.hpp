@@ -96,6 +96,8 @@ class modelFileClass {
             }
 
             tmpTriangleIndices.push_back({tmp[0], tmp[1], tmp[2]});
+
+            tmp.clear();
         }
         
         if (tmpTriangleIndices.size() != 3) {
@@ -106,7 +108,7 @@ class modelFileClass {
 
         std::array<vector3*, 3> vertices = {&geometricVertices[tmpTriangleIndices[0].x - 1], &geometricVertices[tmpTriangleIndices[1].x - 1], &geometricVertices[tmpTriangleIndices[2].x - 1]};
         std::array<vector3*, 3> texture = {&textureCoordinates[tmpTriangleIndices[0].y - 1], &textureCoordinates[tmpTriangleIndices[1].y - 1], &textureCoordinates[tmpTriangleIndices[2].y - 1]};
-        vector3* normal = &vertexNormals[tmpTriangleIndices[0].z];
+        vector3* normal = &vertexNormals[tmpTriangleIndices[0].z - 1];
 
         triangleStruct tmpTriangle;
         tmpTriangle.vertices = vertices;
@@ -119,9 +121,9 @@ class modelFileClass {
 
 
 
-    void loadMtlFile(std::string fileName, std::map<std::string, materialStruct> materialMap) {
+    void loadMtlFile(std::string fileName, std::map<std::string, materialStruct> &materialMap, std::string modelDirectory) {
 
-        std::ifstream file(fileName);
+        std::ifstream file(modelDirectory + fileName);
 
         if (!file) {
             std::cout << "Couldn't open the material file.\n";
@@ -130,8 +132,9 @@ class modelFileClass {
 
         std::string line;
         std::string prefix;
-        materialStruct tmpMaterial;
+        materialStruct tmpMaterial{};
         std::string materialName;
+        std::string textureFileName;
         std::vector<float> tmp;
         float value;
 
@@ -145,9 +148,13 @@ class modelFileClass {
 
             lineStream >> prefix;
 
-            if (prefix == "newmtl" && !materialName.empty()) {
-                materialMap[materialName] = tmpMaterial;
-                tmpMaterial = {};
+            if (prefix == "newmtl") {
+                
+                if (!materialName.empty()) {
+                    materialMap[materialName] = tmpMaterial;
+                    tmpMaterial = {};
+                }
+
                 lineStream >> materialName;
             }
 
@@ -157,7 +164,7 @@ class modelFileClass {
                     tmp.push_back(value);
                 }
 
-                tmpMaterial.ambientColor = {tmp[0], tmp[1], tmp[2]};
+                tmpMaterial.ambientColor = {static_cast<uint8_t>(tmp[0]), static_cast<uint8_t>(tmp[1]), static_cast<uint8_t>(tmp[2])};
             }
 
             else if (prefix == "Kd") {
@@ -166,7 +173,7 @@ class modelFileClass {
                     tmp.push_back(value);
                 }
 
-                tmpMaterial.diffuseColor = {tmp[0], tmp[1], tmp[2]};
+                tmpMaterial.diffuseColor = {static_cast<uint8_t>(tmp[0]), static_cast<uint8_t>(tmp[1]), static_cast<uint8_t>(tmp[2])};
             }
 
             else if (prefix == "Ks") {
@@ -175,7 +182,7 @@ class modelFileClass {
                     tmp.push_back(value);
                 }
 
-                tmpMaterial.specularColor = {tmp[0], tmp[1], tmp[2]};
+                tmpMaterial.specularColor = {static_cast<uint8_t>(tmp[0]), static_cast<uint8_t>(tmp[1]), static_cast<uint8_t>(tmp[2])};
             }
 
             else if (prefix == "Ns") {
@@ -205,7 +212,7 @@ class modelFileClass {
                     tmp.push_back(value);
                 }
 
-                tmpMaterial.transmissionColor = {tmp[0], tmp[1], tmp[2]};
+                tmpMaterial.transmissionColor = {static_cast<uint8_t>(tmp[0]), static_cast<uint8_t>(tmp[1]), static_cast<uint8_t>(tmp[2])};
             }
 
             else if (prefix == "Ni") {
@@ -215,7 +222,43 @@ class modelFileClass {
                 tmpMaterial.opticalDensity = value;
             }
 
+            else if (prefix == "map_Ka") {
 
+                lineStream >> textureFileName;
+
+                textureFileClass::loadTexture(textureFileName, tmpMaterial.ambientTextureMap, modelDirectory);
+
+            }
+            
+            else if (prefix == "map_Kd") {
+                
+                lineStream >> textureFileName;
+                
+                textureFileClass::loadTexture(textureFileName, tmpMaterial.diffuseTextureMap, modelDirectory);
+            }
+            
+            else if (prefix == "map_Ks") {
+                
+                lineStream >> textureFileName;
+                
+                textureFileClass::loadTexture(textureFileName, tmpMaterial.specularColorTextureMap, modelDirectory);
+            }
+            
+            else if (prefix == "map_Ns") {
+                
+                lineStream >> textureFileName;
+                
+                textureFileClass::loadTexture(textureFileName, tmpMaterial.specularHighlightComponent, modelDirectory);
+            }
+            
+            else if (prefix == "map_d") {
+                
+                lineStream >> textureFileName;
+                
+                textureFileClass::loadTexture(textureFileName, tmpMaterial.alphaTextureMap, modelDirectory);
+            }
+            
+            
             tmp.clear();
         }
 
@@ -224,9 +267,9 @@ class modelFileClass {
 
 
 
-    modelFileClass(std::string fileName, std::vector<triangleStruct> &triangleVector, std::map<std::string, materialStruct> &materialMap) {
+    modelFileClass(std::string fileName, std::vector<triangleStruct> &triangleVector, std::map<std::string, materialStruct> &materialMap, std::string modelDirectory) {
 
-        std::ifstream file(fileName);
+        std::ifstream file(modelDirectory + fileName);
 
         if (!file) {
             std::cout << "Couldn't open the model file.\n";
@@ -237,7 +280,7 @@ class modelFileClass {
         objectStruct tmpObject;
         std::string prefix;
         std::string materialName;
-        materialStruct* currentMaterial;
+        materialStruct* currentMaterial = nullptr;
         
 
         while (getline(file, line)) {
@@ -253,7 +296,7 @@ class modelFileClass {
             if (prefix == "mtllib") {
                 std::string mtlFileName;
                 lineStream >> mtlFileName;
-                loadMtlFile(mtlFileName, materialMap);
+                loadMtlFile(mtlFileName, materialMap, modelDirectory);
             }
 
             else if (prefix == "usemtl") {
