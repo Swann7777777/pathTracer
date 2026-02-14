@@ -24,9 +24,9 @@
 #include "../include/ray.hpp"
 
 int main() {
-    int constexpr renderWidth = 255;
-    int constexpr renderHeight = 255;
-    vector3 constexpr cameraPosition = {0, 5, 7};
+    int constexpr renderWidth = 100;
+    int constexpr renderHeight = 100;
+    vector3 constexpr cameraPosition = {0, 5, 5};
     int constexpr cameraFieldOfView = 90;
     float viewportDistance = 1;
     vector3 target = {0, 5, 0};

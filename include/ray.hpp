@@ -140,12 +140,14 @@ class rayClass {
             size_t col = static_cast<size_t>(u * (closestTriangle.material->diffuseTextureMap.width - 1));
             size_t index = row * closestTriangle.material->diffuseTextureMap.width + col;
 
+
+
             pixelVector[ray.i * renderWidth + ray.j] = closestTriangle.material->diffuseTextureMap.pixelVector[index];
         }
 
         else {
-            pixelVector[ray.i * renderWidth + ray.j] = {255, 255, 255};
-            // pixelVector[ray.i * renderWidth + ray.j] = closestTriangle.material->ambientColor;
+            pixelVector[ray.i * renderWidth + ray.j] = {0, 255, 0};
+            //pixelVector[ray.i * renderWidth + ray.j] = closestTriangle.material->ambientColor;
         }
     }
 
@@ -161,7 +163,7 @@ class rayClass {
 
             auto task = std::make_shared<std::packaged_task<void()>>([&triangleVector, ray, &materialMap, &pixelVector, &renderWidth, &bvh]() mutable {
                 
-                triangleStruct closestTriangle;
+                triangleStruct closestTriangle{};
                 bool collision = false;
                 
                 treeTraversal(&bvh.root, ray, closestTriangle, collision);

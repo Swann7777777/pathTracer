@@ -132,7 +132,6 @@ class modelFileClass {
 
         std::string line;
         std::string prefix;
-        materialStruct tmpMaterial{};
         std::string materialName;
         std::string textureFileName;
         std::vector<float> tmp;
@@ -149,11 +148,6 @@ class modelFileClass {
             lineStream >> prefix;
 
             if (prefix == "newmtl") {
-                
-                if (!materialName.empty()) {
-                    materialMap[materialName] = tmpMaterial;
-                    tmpMaterial = {};
-                }
 
                 lineStream >> materialName;
             }
@@ -164,7 +158,7 @@ class modelFileClass {
                     tmp.push_back(value);
                 }
 
-                tmpMaterial.ambientColor = {static_cast<uint8_t>(tmp[0]), static_cast<uint8_t>(tmp[1]), static_cast<uint8_t>(tmp[2])};
+                materialMap[materialName].ambientColor = {static_cast<uint8_t>(tmp[0]), static_cast<uint8_t>(tmp[1]), static_cast<uint8_t>(tmp[2])};
             }
 
             else if (prefix == "Kd") {
@@ -173,7 +167,7 @@ class modelFileClass {
                     tmp.push_back(value);
                 }
 
-                tmpMaterial.diffuseColor = {static_cast<uint8_t>(tmp[0]), static_cast<uint8_t>(tmp[1]), static_cast<uint8_t>(tmp[2])};
+                materialMap[materialName].diffuseColor = {static_cast<uint8_t>(tmp[0]), static_cast<uint8_t>(tmp[1]), static_cast<uint8_t>(tmp[2])};
             }
 
             else if (prefix == "Ks") {
@@ -182,28 +176,28 @@ class modelFileClass {
                     tmp.push_back(value);
                 }
 
-                tmpMaterial.specularColor = {static_cast<uint8_t>(tmp[0]), static_cast<uint8_t>(tmp[1]), static_cast<uint8_t>(tmp[2])};
+                materialMap[materialName].specularColor = {static_cast<uint8_t>(tmp[0]), static_cast<uint8_t>(tmp[1]), static_cast<uint8_t>(tmp[2])};
             }
 
             else if (prefix == "Ns") {
 
                 lineStream >> value;
 
-                tmpMaterial.specularWeight = value;
+                materialMap[materialName].specularWeight = value;
             }
 
             else if (prefix == "d") {
 
                 lineStream >> value;
 
-                tmpMaterial.dissolvance = value;
+                materialMap[materialName].dissolvance = value;
             }
 
             else if (prefix == "Tr") {
 
                 lineStream >> value;
 
-                tmpMaterial.dissolvance = 1 - value;
+                materialMap[materialName].dissolvance = 1 - value;
             }
 
             else if (prefix == "Tf") {
@@ -212,21 +206,21 @@ class modelFileClass {
                     tmp.push_back(value);
                 }
 
-                tmpMaterial.transmissionColor = {static_cast<uint8_t>(tmp[0]), static_cast<uint8_t>(tmp[1]), static_cast<uint8_t>(tmp[2])};
+                materialMap[materialName].transmissionColor = {static_cast<uint8_t>(tmp[0]), static_cast<uint8_t>(tmp[1]), static_cast<uint8_t>(tmp[2])};
             }
 
             else if (prefix == "Ni") {
 
                 lineStream >> value;
 
-                tmpMaterial.opticalDensity = value;
+                materialMap[materialName].opticalDensity = value;
             }
 
             else if (prefix == "map_Ka") {
 
                 lineStream >> textureFileName;
 
-                textureFileClass::loadTexture(textureFileName, tmpMaterial.ambientTextureMap, modelDirectory);
+                textureFileClass::loadTexture(textureFileName, materialMap[materialName].ambientTextureMap, modelDirectory);
 
             }
             
@@ -234,35 +228,33 @@ class modelFileClass {
                 
                 lineStream >> textureFileName;
                 
-                textureFileClass::loadTexture(textureFileName, tmpMaterial.diffuseTextureMap, modelDirectory);
+                textureFileClass::loadTexture(textureFileName, materialMap[materialName].diffuseTextureMap, modelDirectory);
             }
             
             else if (prefix == "map_Ks") {
                 
                 lineStream >> textureFileName;
                 
-                textureFileClass::loadTexture(textureFileName, tmpMaterial.specularColorTextureMap, modelDirectory);
+                textureFileClass::loadTexture(textureFileName, materialMap[materialName].specularColorTextureMap, modelDirectory);
             }
             
             else if (prefix == "map_Ns") {
                 
                 lineStream >> textureFileName;
                 
-                textureFileClass::loadTexture(textureFileName, tmpMaterial.specularHighlightComponent, modelDirectory);
+                textureFileClass::loadTexture(textureFileName, materialMap[materialName].specularHighlightComponent, modelDirectory);
             }
             
             else if (prefix == "map_d") {
                 
                 lineStream >> textureFileName;
                 
-                textureFileClass::loadTexture(textureFileName, tmpMaterial.alphaTextureMap, modelDirectory);
+                textureFileClass::loadTexture(textureFileName, materialMap[materialName].alphaTextureMap, modelDirectory);
             }
             
             
             tmp.clear();
         }
-
-        materialMap[materialName] = tmpMaterial;
     }
 
 
