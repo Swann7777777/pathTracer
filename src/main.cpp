@@ -32,10 +32,12 @@ int main() {
     vector3 target = {0, 5, 0};
     vector3 v = {0, 1, 0};
     int bvhDepth = 50;
+
     const std::string imageFileName = "../renders/render.bmp";
     const std::string modelDirectory = "../models/strider/";
     const std::string modelFileName = "strider_tank.obj";
     const std::string textureFileName = "";
+    
     cameraClass camera(cameraPosition, cameraFieldOfView, viewportDistance, v);
 
     textureStruct texture;
